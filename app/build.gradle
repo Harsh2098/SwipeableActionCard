@@ -59,7 +59,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
     implementation 'androidx.activity:activity-compose:1.3.0-alpha06'
 
-    implementation 'com.github.Harsh2098:SwipeableActionCard:0.2.0'
+    implementation project(":swipeableactioncard")
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
