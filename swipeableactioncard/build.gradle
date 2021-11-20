@@ -62,7 +62,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = 'com.hmproductions.utils'
                 artifactId = 'swipeableactioncard'
-                version = '0.1.0-beta'
+                version = '0.2.0'
             }
             // Creates a Maven publication called “debug”.
             debug(MavenPublication) {
@@ -71,7 +71,7 @@ afterEvaluate {
 
                 groupId = 'com.hmproductions.utils'
                 artifactId = 'swipeableactioncard-debug'
-                version = '0.1.0-beta'
+                version = '0.2.0'
             }
         }
     }

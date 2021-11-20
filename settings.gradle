@@ -7,5 +7,6 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Compose Tester"
-include ':app'
+if (!System.env.JITPACK)
+    include ':app'
 include ':swipeableactioncard'
