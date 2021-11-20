@@ -60,18 +60,9 @@ afterEvaluate {
                 from components.release
 
                 // You can then customize attributes of the publication as shown below.
-                groupId = 'com.hmproductions.utils'
-                artifactId = 'swipeableactioncard'
-                version = swipeableactioncard
-            }
-            // Creates a Maven publication called “debug”.
-            debug(MavenPublication) {
-                // Applies the component for the debug build variant.
-                from components.debug
-
-                groupId = 'com.hmproductions.utils'
-                artifactId = 'swipeableactioncard-debug'
-                version = swipeableactioncard
+                groupId = 'com.github.Harsh2098'
+                artifactId = 'SwipeableActionCard'
+                version = swipeableactioncard_version
             }
         }
     }
