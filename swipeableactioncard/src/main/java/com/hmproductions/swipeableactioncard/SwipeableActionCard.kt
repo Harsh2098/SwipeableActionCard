@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -22,18 +23,35 @@ import androidx.constraintlayout.compose.Dimension
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-private enum class SwipeCardState {
-    DEFAULT,
-    LEFT,
-    RIGHT
-}
+/**
+ * @param mainCard Composable which displays the main card content
+ * @param leftSwipeCard Composable to display action card when main card is swiped left
+ * @param rightSwipeCard Composable to display action card when main card is swiped right
+ *
+ * @param leftSwiped Method to be invoked when main card is swiped to left anchor
+ * @param rightSwiped Method to be invoked when main card is swiped to right anchor
+ *
+ * @param animationSpec animation to use when animating main card back to default position
+ * @param thresholds will be used to determine which state to animate to when swiping stops
+ * @param velocityThreshold velocity threshold in dp per second
+ */
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun SwipeableActionCard(
-    mainCard: @Composable () -> Unit, leftSwipeCard: @Composable () -> Unit,
-    rightSwipeCard: @Composable () -> Unit, leftSwiped: () -> Unit, rightSwiped: () -> Unit,
-    modifier: Modifier = Modifier, animationSpec: AnimationSpec<Float> = tween(250)
+    mainCard: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    leftSwipeCard: (@Composable () -> Unit)? = null,
+    rightSwipeCard: (@Composable () -> Unit)? = null,
+    leftSwiped: (() -> Unit)? = null,
+    rightSwiped: (() -> Unit)? = null,
+    animationSpec: AnimationSpec<Float> = tween(250),
+    thresholds: (from: SwipeCardState, to: SwipeCardState) -> ThresholdConfig = { _, _ ->
+        FractionalThreshold(
+            0.6f
+        )
+    },
+    velocityThreshold: Dp = 125.dp
 ) {
     ConstraintLayout(modifier = modifier) {
         val (mainCardRef, actionCardRef) = createRefs()
@@ -52,16 +70,22 @@ fun SwipeableActionCard(
         val maxWidthInPx = with(LocalDensity.current) {
             LocalConfiguration.current.screenWidthDp.dp.toPx()
         }
-        val anchors = mapOf(
-            0f to SwipeCardState.DEFAULT,
-            -maxWidthInPx to SwipeCardState.LEFT,
-            maxWidthInPx to SwipeCardState.RIGHT
-        )
+
+        val anchors = hashMapOf(0f to SwipeCardState.DEFAULT)
+        if (leftSwipeCard != null)
+            anchors[-maxWidthInPx] = SwipeCardState.LEFT
+
+        if (rightSwipeCard != null)
+            anchors[maxWidthInPx] = SwipeCardState.RIGHT
 
         /* This surface is for action card which is below the main card */
         Surface(
             color = Color.Transparent,
-            content = if (swipeLeftCardVisible.value) leftSwipeCard else rightSwipeCard,
+            content = if (swipeLeftCardVisible.value) {
+                leftSwipeCard
+            } else {
+                rightSwipeCard
+            } ?: {},
             modifier = Modifier
                 .fillMaxWidth()
                 .constrainAs(actionCardRef) {
@@ -76,15 +100,18 @@ fun SwipeableActionCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .offset {
-                    IntOffset(swipeableState.offset.value.roundToInt(), 0)
+                    var offset = swipeableState.offset.value.roundToInt()
+                    if (offset < 0 && leftSwipeCard == null) offset = 0
+                    if (offset > 0 && rightSwipeCard == null) offset = 0
+                    IntOffset(offset, 0)
                 }
                 .swipeable(
                     state = swipeableState,
                     anchors = anchors,
                     orientation = Orientation.Horizontal,
                     enabled = swipeEnabled.value,
-                    thresholds = { _, _ -> FractionalThreshold(0.6f) },
-                    velocityThreshold = 125.dp
+                    thresholds = thresholds,
+                    velocityThreshold = velocityThreshold
                 )
                 .constrainAs(mainCardRef) {
                     top.linkTo(parent.top)
@@ -92,14 +119,14 @@ fun SwipeableActionCard(
                 }) {
 
             if (swipeableState.currentValue == SwipeCardState.LEFT && !swipeableState.isAnimationRunning) {
-                leftSwiped()
+                leftSwiped?.invoke()
                 coroutineScope.launch {
                     swipeEnabled.value = false
                     swipeableState.animateTo(SwipeCardState.DEFAULT)
                     swipeEnabled.value = true
                 }
             } else if (swipeableState.currentValue == SwipeCardState.RIGHT && !swipeableState.isAnimationRunning) {
-                rightSwiped()
+                rightSwiped?.invoke()
                 coroutineScope.launch {
                     swipeEnabled.value = false
                     swipeableState.animateTo(SwipeCardState.DEFAULT)

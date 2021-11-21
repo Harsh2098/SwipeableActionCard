@@ -2,11 +2,12 @@
 buildscript {
     ext {
         compose_version = '1.0.5'
-        swipeableactioncard_version = '0.3.0'
+        swipeableactioncard_version = '0.5.0'
     }
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:7.0.3"
@@ -17,11 +18,11 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        maven { url 'https://jitpack.io' }
-    }
-}
+//allprojects {
+//    repositories {
+//
+//    }
+//}
 
 task clean(type: Delete) {
     delete rootProject.buildDir

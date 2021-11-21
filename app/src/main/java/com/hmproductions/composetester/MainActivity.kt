@@ -2,7 +2,6 @@ package com.hmproductions.composetester
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -10,16 +9,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hmproductions.composetester.ui.theme.ComposeTesterTheme
 import com.hmproductions.swipeableactioncard.SwipeableActionCard
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,9 +34,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyScreen() {
-    val context = LocalContext.current
+    val scaffoldState = rememberScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
                 title = {
@@ -50,13 +52,23 @@ fun MyScreen() {
                 .padding(8.dp)
                 .clip(MaterialTheme.shapes.medium)
         ) {
-            SwipeableActionCard({ MainCard() }, { FavoritesCard() }, { DeleteCard() }, {
-                Toast.makeText(context, "Swiped left", Toast.LENGTH_SHORT).show()
-                Log.v("SwipeableActionCard", "swiped left")
-            }, {
-                Toast.makeText(context, "Swiped right", Toast.LENGTH_SHORT).show()
-                Log.v("SwipeableActionCard", "swiped right")
-            })
+            SwipeableActionCard(
+                mainCard = { MainCard() },
+                leftSwipeCard = { FavoritesCard() },
+                rightSwipeCard = { DeleteCard() },
+                leftSwiped = {
+                    scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
+                    coroutineScope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar("Swiped left")
+                    }
+                    Log.v("SwipeableActionCard", "swiped left")
+                }, rightSwiped = {
+                    scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
+                    coroutineScope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar("Swiped right")
+                    }
+                    Log.v("SwipeableActionCard", "swiped right")
+                })
         }
     }
 }
