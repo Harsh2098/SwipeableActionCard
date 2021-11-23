@@ -18,6 +18,6 @@ Include dependency  in app level `build.gradle` file
 ```
 dependencies {
   ...
-  implementation 'com.github.Harsh2098:SwipeableActionCard:0.5.0'
+  implementation 'com.github.Harsh2098:SwipeableActionCard:1.0.0'
 }
 ```
