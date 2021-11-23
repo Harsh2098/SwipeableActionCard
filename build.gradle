@@ -2,7 +2,7 @@
 buildscript {
     ext {
         compose_version = '1.0.5'
-        swipeableactioncard_version = '0.5.0'
+        swipeableactioncard_version = '1.0.0'
     }
     repositories {
         google()
